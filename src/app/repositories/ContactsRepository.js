@@ -20,8 +20,11 @@ let contacts = [
 ];
 
 class ContactsRepository {
-  async findAll() {
-    const rows = await db.query('SELECT * FROM contacts');
+  async findAll(orderBy = 'ASC') {
+    // orderBy -> ordenacao feita no Controller, usuario agora escolhe qual ordenacao por nome ele quer
+
+    const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    const rows = await db.query(`SELECT * FROM contacts ORDER BY name ${direction}`);
     return rows;
   }
 
