@@ -1,5 +1,7 @@
 const { v4 } = require('uuid'); // universal unique ID
 
+const db = require('../../database/index');
+
 let contacts = [
   {
     id: v4(),
@@ -41,19 +43,18 @@ class ContactsRepository {
     });
   }
 
-  create({ name, email, phone, category_id }) {
-    return new Promise((resolve) => {
-      const newContact = {
-        id: v4(),
-        name,
-        email,
-        phone,
-        category_id,
-      };
+  async create({ name, email, phone, category_id }) {
+    // OBS: Ataque de SQL Injection -> usuario consegue forcar erros direto no banco de dados
+    // isso abre espaco para o usuario malicioso alterar a db
+    // para evitar esse ataque se usa essa forma: VALUES($1, $2, $3, $4, etc) passando os valores
+    // para o array que vem em sequencia
+    const [row] = await db.query(`
+      INSERT INTO contacts(name, email, phone, category_id)
+      VALUES($1, $2, $3, $4)
+      RETURNING *
+    `, [name, email, phone, category_id]);
 
-      contacts.push(newContact);
-      resolve(newContact);
-    });
+    return row;
   }
 
   update(id, { name, email, phone, category_id }) {
