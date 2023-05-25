@@ -5,12 +5,22 @@ class ContactsRepository {
     // orderBy -> ordenacao feita no Controller, usuario agora escolhe qual ordenacao por nome ele quer
 
     const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-    const rows = await db.query(`SELECT * FROM contacts ORDER BY name ${direction}`);
+    const rows = await db.query(`
+      SELECT contacts.*, categories.name AS category_name
+      FROM contacts
+      LEFT JOIN categories ON categories.id = contacts.category_id
+      ORDER BY contacts.name ${direction}
+    `);
     return rows;
   }
 
   async findById(id) {
-    const [row] = await db.query('SELECT * FROM contacts WHERE id = $1', [id]);
+    const [row] = await db.query(`
+    SELECT contacts.*, categories.name AS category_name
+    FROM contacts
+    LEFT JOIN categories ON categories.id = contacts.category_id
+    WHERE contacts.id = $1
+    `, [id]);
     return row;
   }
 
